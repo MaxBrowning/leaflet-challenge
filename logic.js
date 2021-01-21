@@ -10,14 +10,24 @@ d3.json(queryUrl, function(data) {
 function createFeatures(earthquakeData) {
 
   // Define a function we want to run once for each feature in the features array
-  // Give each feature a popup describing the place and time of the earthquake
+  // Give each layer a popup
   function onEachFeature(feature, layer) {
-    layer.bindPopup("<h3>" + feature.properties.title + "</h3>");
+    layer.bindPopup("<p>Magnitude: " + feature.properties.mag + "</p><p>" + feature.properties.place + "</p><p>Depth: " + feature.geometry.coordinates[2] + "</p>");
   }
 
   // Create a GeoJSON layer containing the features array on the earthquakeData object
   // Run the onEachFeature function once for each piece of data in the array
   var earthquakes = L.geoJSON(earthquakeData, {
+    pointToLayer: function (feature, latlng) {
+      return L.circleMarker(latlng)
+    },
+    style: function (feature) {
+      return {
+        radius: feature.properties.mag * 4,
+        fillColor: feature.geometry.coordinates[2],
+        color: 'white',
+      }
+    },
     onEachFeature: onEachFeature
   });
 
@@ -70,4 +80,18 @@ function createMap(earthquakes) {
   L.control.layers(baseMaps, overlayMaps, {
     collapsed: false
   }).addTo(myMap);
+
+// Create a legend to display information about our map
+var info = L.control({
+  position: "bottomright"
+});
+
+// When the layer control is added, insert a div with the class of "legend"
+info.onAdd = function() {
+  var div = L.DomUtil.create("div", "legend");
+  return div;
+};
+// Add the info legend to the map
+info.addTo(myMap);
 }
+
