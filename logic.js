@@ -7,15 +7,25 @@ d3.json(queryUrl, function(data) {
   createFeatures(data.features);
 });
 
+function getColor(d) {
+  return d >= 70 ? '#007dff' :
+         d >= 50 ? '#1b904f' :
+         d >= 30 ? '#f4ba48' :
+         d >= 10 ? '#ec8a2e' :
+                  '#a0353a';
+};
+
 function createFeatures(earthquakeData) {
 
   // Define a function we want to run once for each feature in the features array
   // Give each layer a popup
   function onEachFeature(feature, layer) {
     layer.bindPopup("<p>Magnitude: " + feature.properties.mag + "</p><p>" + feature.properties.place + "</p><p>Depth: " + feature.geometry.coordinates[2] + "</p>");
-  }
+  };
 
   // Create a GeoJSON layer containing the features array on the earthquakeData object
+  // Make markers be circles
+  // Update style for each circle with radius corresponding to magnitude and color corresponding to depth
   // Run the onEachFeature function once for each piece of data in the array
   var earthquakes = L.geoJSON(earthquakeData, {
     pointToLayer: function (feature, latlng) {
@@ -24,8 +34,10 @@ function createFeatures(earthquakeData) {
     style: function (feature) {
       return {
         radius: feature.properties.mag * 4,
-        fillColor: feature.geometry.coordinates[2],
-        color: 'white',
+        color: "white",
+        fillColor: getColor(feature.geometry.coordinates[2]),
+        weight: 1,
+        fillOpacity: 0.8,
       }
     },
     onEachFeature: onEachFeature
@@ -81,17 +93,30 @@ function createMap(earthquakes) {
     collapsed: false
   }).addTo(myMap);
 
+
 // Create a legend to display information about our map
-var info = L.control({
+var legend = L.control({
   position: "bottomright"
 });
 
 // When the layer control is added, insert a div with the class of "legend"
-info.onAdd = function() {
-  var div = L.DomUtil.create("div", "legend");
+legend.onAdd = function(map) {
+  var div = L.DomUtil.create("div", "info legend"),
+    depths = ['-10', '10', '30', '50', '70'],
+    labels = [];
+
+  div.innerHTML += '<h4>EQ Depth</h4>'
+
+  // loop through intervals to create a label with colored square
+  for (var i = 0; i < depths.length; i++) {
+    div.innerHTML +=
+        '<i style="background:' + getColor(depths[i]) + '"></i> ' +
+        depths[i] + (depths[i + 1] ? '&ndash;' + depths[i + 1] + '<br>' : '+');
+  }
+
   return div;
 };
-// Add the info legend to the map
-info.addTo(myMap);
-}
 
+// Add the info legend to the map
+legend.addTo(myMap);
+}
