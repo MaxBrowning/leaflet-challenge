@@ -4,3 +4,4 @@ Using Leaflet and d3.js, I then plot all earthquakes listed. The size of each ma
 
 ## Image of final map:
 ![](https://github.com/MaxBrowning/leaflet-challenge/blob/main/image_of_final_map.JPG)
+![](https://github.com/MaxBrowning/leaflet-challenge/blob/main/image_of_final_dark_map.JPG)
